@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+    <info organisation="me.ggicci" module="hello"/>
+    <dependencies>
+        <!-- Define the JUnit dependency -->
+        <dependency org="junit" name="junit" rev="4.13.2" />
+        <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.10">
+            <artifact name="org.jacoco.ant" type="jar" />
+        </dependency>
+    </dependencies>
+</ivy-module>

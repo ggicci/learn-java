@@ -1,0 +1,141 @@
+<project name="Hello" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <!-- Define properties -->
+    <property name="src.dir" value="src" />
+    <property name="build.dir" value="build" />
+    <property name="build.bin.dir" value="build/bin" />
+    <property name="build.test-bin.dir" value="build/test-bin" />
+    <property name="build.test-reports.dir" value="build/test-reports" />
+    <property name="test.dir" value="test" />
+    <property name="lib.dir" value="lib" />
+
+    <path id="src.path">
+        <pathelement location="${src.dir}" />
+        <pathelement location="${test.dir}" />
+    </path>
+
+
+    <!-- Resolve dependencies -->
+    <target name="resolve" description="Resolve dependencies">
+        <ivy:resolve />
+    </target>
+
+    <!-- Retrieve dependencies -->
+    <target name="retrieve" depends="resolve" description="Retrieve dependencies">
+        <ivy:retrieve pattern="lib/[artifact]-[revision](-[classifier]).[ext]" />
+    </target>
+
+    <!-- Define targets -->
+    <target name="init">
+        <mkdir dir="${build.bin.dir}" />
+        <mkdir dir="${build.test-bin.dir}" />
+        <mkdir dir="${build.test-reports.dir}" />
+    </target>
+
+    <target name="compile" depends="init, retrieve">
+        <javac srcdir="${src.dir}" destdir="${build.bin.dir}" includeantruntime="true">
+            <classpath>
+                <pathelement location="${build.bin.dir}" />
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="compile-tests" depends="compile">
+        <javac srcdir="${test.dir}" destdir="${build.test-bin.dir}" includeantruntime="true">
+            <classpath>
+                <pathelement location="${build.bin.dir}" />
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="run-tests" depends="compile-tests">
+        <junit printsummary="yes" fork="true">
+            <classpath>
+                <pathelement location="${build.test-bin.dir}" />
+                <pathelement location="${build.bin.dir}" />
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+            <batchtest todir="${build.test-reports.dir}">
+                <fileset dir="${build.test-bin.dir}">
+                    <include name="**/*Test.class" />
+                </fileset>
+            </batchtest>
+            <formatter type="xml" />
+        </junit>
+    </target>
+
+    <!-- Define the taskdef for JaCoCo -->
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath>
+            <pathelement location="${lib.dir}/org.jacoco.ant-0.8.10.jar" />
+            <fileset dir="${lib.dir}">
+                <include name="org.jacoco.*.jar" />
+            </fileset>
+        </classpath>
+    </taskdef>
+
+    <target name="run-tests-with-coverage">
+        <jacoco:coverage destfile="${build.test-reports.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant">
+            <junit printsummary="yes" fork="true" forkmode="once">
+                <classpath>
+                    <pathelement location="${build.test-bin.dir}" />
+                    <pathelement location="${build.bin.dir}" />
+                    <fileset dir="${lib.dir}">
+                        <include name="*.jar" />
+                    </fileset>
+                </classpath>
+                <batchtest todir="${build.test-reports.dir}">
+                    <fileset dir="${build.test-bin.dir}">
+                        <include name="**/*Test.class" />
+                    </fileset>
+                </batchtest>
+            </junit>
+        </jacoco:coverage>
+    </target>
+
+    <target name="generate-coverage-report">
+        <jacoco:report>
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="org.jacoco.*.jar" />
+                </fileset>
+            </classpath>    
+            <executiondata>
+                <file file="${build.test-reports.dir}/jacoco.exec" />
+            </executiondata>
+            <structure name="Hello">
+                <classfiles>
+                    <fileset dir="${build.bin.dir}">
+                        <include name="**/*.class" />
+                    </fileset>
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="${src.dir}">
+                        <include name="**/*.java" />
+                    </fileset>
+                </sourcefiles>
+            </structure>
+            <html destdir="${build.test-reports.dir}/coverage/html" />
+        </jacoco:report>
+    </target>
+
+    <target name="open-reports">
+        <exec executable="open">
+            <arg value="${build.test-reports.dir}/coverage/html/index.html" />
+        </exec>
+    </target>
+
+    <target name="test" depends="run-tests-with-coverage, generate-coverage-report, open-reports" />
+
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+</project>
+
