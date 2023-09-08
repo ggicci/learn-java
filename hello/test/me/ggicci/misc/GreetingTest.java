@@ -1,4 +1,5 @@
-import me.ggicci.misc.Greeting;
+package me.ggicci.misc;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 

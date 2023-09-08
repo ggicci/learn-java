@@ -1,4 +1,4 @@
-<project name="Hello" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="Hello" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:jacoco="antlib:org.jacoco.ant">
     <!-- Define properties -->
     <property name="src.dir" value="src" />
     <property name="build.dir" value="build" />
@@ -12,6 +12,11 @@
         <pathelement location="${src.dir}" />
         <pathelement location="${test.dir}" />
     </path>
+
+    <!-- Define the taskdef for JaCoCo -->
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath path="${lib.dir}/org.jacoco.ant-0.8.10-nodeps.jar" />
+    </taskdef>
 
 
     <!-- Resolve dependencies -->
@@ -31,7 +36,7 @@
         <mkdir dir="${build.test-reports.dir}" />
     </target>
 
-    <target name="compile" depends="init, retrieve">
+    <target name="compile" depends="init, retrieve" description="Compile the app">
         <javac srcdir="${src.dir}" destdir="${build.bin.dir}" includeantruntime="true">
             <classpath>
                 <pathelement location="${build.bin.dir}" />
@@ -42,7 +47,7 @@
         </javac>
     </target>
 
-    <target name="compile-tests" depends="compile">
+    <target name="compile-tests" depends="compile" description="Compile the tests">
         <javac srcdir="${test.dir}" destdir="${build.test-bin.dir}" includeantruntime="true">
             <classpath>
                 <pathelement location="${build.bin.dir}" />
@@ -53,7 +58,7 @@
         </javac>
     </target>
 
-    <target name="run-tests" depends="compile-tests">
+    <target name="run-tests" depends="compile-tests" description="Run unit tests">
         <junit printsummary="yes" fork="true">
             <classpath>
                 <pathelement location="${build.test-bin.dir}" />
@@ -71,18 +76,8 @@
         </junit>
     </target>
 
-    <!-- Define the taskdef for JaCoCo -->
-    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-        <classpath>
-            <pathelement location="${lib.dir}/org.jacoco.ant-0.8.10.jar" />
-            <fileset dir="${lib.dir}">
-                <include name="org.jacoco.*.jar" />
-            </fileset>
-        </classpath>
-    </taskdef>
-
-    <target name="run-tests-with-coverage">
-        <jacoco:coverage destfile="${build.test-reports.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant">
+    <target name="run-tests-with-coverage" depends="compile-tests" description="Run unit tests with coverage">
+        <jacoco:coverage destfile="${build.test-reports.dir}/jacoco.exec">
             <junit printsummary="yes" fork="true" forkmode="once">
                 <classpath>
                     <pathelement location="${build.test-bin.dir}" />
@@ -100,13 +95,8 @@
         </jacoco:coverage>
     </target>
 
-    <target name="generate-coverage-report">
+    <target name="generate-coverage-report" description="Generate coverage report">
         <jacoco:report>
-            <classpath>
-                <fileset dir="${lib.dir}">
-                    <include name="org.jacoco.*.jar" />
-                </fileset>
-            </classpath>    
             <executiondata>
                 <file file="${build.test-reports.dir}/jacoco.exec" />
             </executiondata>
@@ -126,15 +116,19 @@
         </jacoco:report>
     </target>
 
-    <target name="open-reports">
+    <target name="open-reports" description="Open the HTML coverage report">
         <exec executable="open">
             <arg value="${build.test-reports.dir}/coverage/html/index.html" />
         </exec>
     </target>
 
-    <target name="test" depends="run-tests-with-coverage, generate-coverage-report, open-reports" />
+    <target
+        name="test"
+        depends="run-tests-with-coverage, generate-coverage-report, open-reports"
+        description="Run tests and generate coverage report and view it"
+    />
 
-    <target name="clean">
+    <target name="clean" description="Clean built artifacts">
         <delete dir="${build.dir}" />
     </target>
 </project>
