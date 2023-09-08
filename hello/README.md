@@ -95,3 +95,17 @@ In the `ivy.xml`, add `e:classifier` to download `nodeps`. Don't forget to add t
     <artifact name="org.jacoco.ant" type="jar" e:classifier="nodeps" />
 </dependency>
 ```
+
+### `Class files must be compiled with debug information to link with source files.`
+
+Run `javac` with debug information enabled. In `build.xml`, add property `debug=true` to tag `<javac>`. Reference: [Enabling javac debugging for Apache ANT](https://stackoverflow.com/a/11893054/1592264).
+
+```xml
+<javac srcdir="${src.dir}" destdir="${build.bin.dir}" includeantruntime="true" debug="true">
+```
+
+### Screenshots of the Coverage Report
+
+![image-01](assets/coverage-report-screenshot-01.png)
+![image-02](assets/coverage-report-screenshot-02.png)
+![image-03](assets/coverage-report-screenshot-03.png)

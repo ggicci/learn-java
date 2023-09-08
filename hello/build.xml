@@ -37,7 +37,7 @@
     </target>
 
     <target name="compile" depends="init, retrieve" description="Compile the app">
-        <javac srcdir="${src.dir}" destdir="${build.bin.dir}" includeantruntime="true">
+        <javac srcdir="${src.dir}" destdir="${build.bin.dir}" includeantruntime="true" debug="true">
             <classpath>
                 <pathelement location="${build.bin.dir}" />
                 <fileset dir="${lib.dir}">
@@ -48,7 +48,7 @@
     </target>
 
     <target name="compile-tests" depends="compile" description="Compile the tests">
-        <javac srcdir="${test.dir}" destdir="${build.test-bin.dir}" includeantruntime="true">
+        <javac srcdir="${test.dir}" destdir="${build.test-bin.dir}" includeantruntime="true" debug="true">
             <classpath>
                 <pathelement location="${build.bin.dir}" />
                 <fileset dir="${lib.dir}">
